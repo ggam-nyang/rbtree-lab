@@ -12,9 +12,30 @@ void delete_rbtree(rbtree *t) {
   free(t);
 }
 
-node_t *rbtree_insert(const rbtree *t, const key_t key) {
-  // TODO: implement insert
-  return t->root;
+
+
+
+node_t *rbtree_insert(rbtree *t, const key_t key) {
+  if (t -> root == NULL)
+  {
+    t -> root = (node_t*)calloc(sizeof(node_t), 1);
+    t -> root -> key = key;
+    t -> root -> color = RBTREE_BLACK;
+    t -> root -> parent = NULL;
+    t -> root -> left = NULL;
+    t -> root -> right = NULL;
+    return t -> root;    
+  }
+
+  else
+  {
+    if (t -> root -> key > key)
+      t -> root -> left = rbtree_insert(t -> root -> left, key);
+    else if (t -> root -> key < key)
+      t -> root -> right = rbtree_insert(t -> root -> right, key);
+  }
+
+  return t -> root;
 }
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
