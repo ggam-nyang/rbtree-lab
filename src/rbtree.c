@@ -361,7 +361,7 @@ int rbtree_erase(rbtree *t, node_t *new) {
       if ((new -> color == RBTREE_BLACK) && (new_child == NULL || new_child -> color == RBTREE_BLACK)) {
         fix_double_black(t, new);
       }
-      // 색이 달라!! 부모, 자식 중 하나는 빨강, 근데 자식이 없네? 그럼 삼촌만 빨갛게!!
+      // 색이 달라!! 부모, 자식 중 하나는 빨강, 근데 자식이 없네? 그럼 형제만 빨갛게!!
       else {
         node_t *new_sibl = find_sibling(new);
         if (new_sibl != NULL)
@@ -383,8 +383,8 @@ int rbtree_erase(rbtree *t, node_t *new) {
       new -> key = new_child -> key;
       new -> left = NULL;
       new -> right = NULL;
-      new_child = NULL;
       free(new_child);
+      new_child = NULL;
     }
     // new를 삭제하고, child를 위로 올려준다!`
     else {
@@ -394,12 +394,12 @@ int rbtree_erase(rbtree *t, node_t *new) {
       else {
         new_parent -> right = new_child;
       }
-      free(new);
       new_child -> parent = new_parent;
       if ((new -> color == RBTREE_BLACK) && (new_child -> color == RBTREE_BLACK || new_child == NULL))
         fix_double_black(t, new_child);
       else
         new_child -> color = RBTREE_BLACK;
+      free(new);
     }
     return 0;
   }
@@ -410,8 +410,6 @@ int rbtree_erase(rbtree *t, node_t *new) {
   new -> key = new_child -> key;
   new_child -> key = temp;
   rbtree_erase(t, new_child);
-
-
 
   return 0;
 }
