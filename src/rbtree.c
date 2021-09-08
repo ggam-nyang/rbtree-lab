@@ -8,9 +8,24 @@ rbtree *new_rbtree(void) {
   return p;
 }
 
+
+void delete_node(node_t *n) {
+  if (n == NULL)
+    return ;
+
+  if (n -> left != NULL)
+    delete_node(n -> left);
+    
+  if (n -> right != NULL)
+    delete_node(n -> right);
+  
+  free(n);
+}
+
 void delete_rbtree(rbtree *t) {
-  // TODO: reclaim the tree nodes's memory
+  delete_node(t -> root);
   free(t);
+  t = NULL;
 }
 
 
@@ -59,6 +74,7 @@ node_t *node_insert(node_t *root, node_t *new, const key_t key) {
   return root;
 }
 
+
 // insert 후 color를 조정하는 함수 (루트, 새 노드)
 void insert_color(rbtree *t, node_t *new) {
   node_t *new_parent = NULL;
@@ -74,15 +90,15 @@ void insert_color(rbtree *t, node_t *new) {
     if (new_parent == new_grandpa -> left) 
     {
       node_t *new_uncle = new_grandpa -> right;
-      // 케이스 1-1 : 삼촌이 빨강! (부모도 빨강인 상황)
+      // 케이스 1-1 : 삼촌이 빨강! (부모도 빨강인 상황) -> recolur 해주면 됨
       if (new_uncle != NULL && new_uncle -> color == RBTREE_RED)
       {
         new_grandpa -> color = RBTREE_RED;
         new_parent -> color = RBTREE_BLACK;
         new_uncle -> color = RBTREE_BLACK;
-        new = new_grandpa;
+        new = new_grandpa;  // 이렇게 바꿔 줌으로써, 다시 while문을 돌게 됨. (재귀가 아닌 반복문!!!)
       }
-      // 케이스 1-2 : 삼촌이 빨강이 아니고 내가 오른쪽 자식일 때 (왼쪽 로테이션이 필요할 때)
+      // 케이스 1-2 : 삼촌이 빨강이 아니고(까망) 내가 오른쪽 자식일 때 (왼쪽 로테이션이 필요할 때)
       else 
       {
         if (new == new_parent -> right)
@@ -134,42 +150,43 @@ void insert_color(rbtree *t, node_t *new) {
   t -> root -> color = RBTREE_BLACK;
 }
 
-void left_rotate(rbtree *t, node_t *temp)
+void left_rotate(rbtree *t, node_t *pivot)
 {
-  node_t *right_c = temp -> right;
-  temp -> right = right_c -> left;
-  if (temp -> right)
-    temp -> right -> parent = temp;
-  right_c -> parent = temp -> parent;
-  // 이 부분에서 에러가 날 수 도!!!! EEEERRRRRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRRRRRR  (왜냐하면 rbtree *이 아닌 *root를 인자로 줬으므로! 괜찮을 것 같긴 함)
-  if (!temp -> parent)
-    t -> root = right_c;
-  else if (temp == temp -> parent -> left)
-    temp -> parent -> left = right_c;
-  else
-    temp -> parent -> right = right_c;
+  node_t *right_child = pivot -> right;
   
-  right_c -> left = temp;
-  temp -> parent = right_c;
+  pivot -> right = right_child -> left;
+  if (pivot -> right)
+    pivot -> right -> parent = pivot;
+  right_child -> parent = pivot -> parent;
+
+  if (!pivot -> parent)
+    t -> root = right_child;
+  else if (pivot == pivot -> parent -> left)
+    pivot -> parent -> left = right_child;
+  else
+    pivot -> parent -> right = right_child;
+  
+  right_child -> left = pivot;
+  pivot -> parent = right_child;
 }
 
-void right_rotate(rbtree *t ,node_t *temp)
+void right_rotate(rbtree *t ,node_t *pivot)
 {
-  node_t *left_c = temp -> left;
-  temp -> left = left_c -> right;
-  if (temp -> left)
-    temp -> left -> parent = temp;
-  left_c -> parent = temp -> parent;
-  // 이 부분에서 에러가 날 수 도!!!! EEEERRRRRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRRRRRR  (왜냐하면 rbtree *이 아닌 *root를 인자로 줬으므로! 괜찮을 것 같긴 함)
-  if (!temp -> parent) 
-    t -> root = left_c;
-  else if (temp == temp -> parent -> left)
-    temp -> parent -> left = left_c;
+  node_t *left_child = pivot -> left;
+  pivot -> left = left_child -> right;
+  if (pivot -> left)
+    pivot -> left -> parent = pivot;
+  left_child -> parent = pivot -> parent;
+
+  if (!pivot -> parent) 
+    t -> root = left_child;
+  else if (pivot == pivot -> parent -> left)
+    pivot -> parent -> left = left_child;
   else
-    temp -> parent -> right = left_c;
+    pivot -> parent -> right = left_child;
   
-  left_c -> right = temp;
-  temp -> parent = left_c;
+  left_child -> right = pivot;
+  pivot -> parent = left_child;
 
 }
 
@@ -192,14 +209,6 @@ node_t *rbtree_find(const rbtree *t, const key_t key) {
   return NULL;
 }
 
-void print_inorder(node_t *root) {
-  
-  if (root == NULL)
-    return ;
-  print_inorder(root -> left);
-  printf("%d   %d\n", root -> key, root -> color);
-  print_inorder(root -> right);
-}
 
 
 node_t *rbtree_min(const rbtree *t) {
@@ -317,7 +326,7 @@ void *fix_double_black(rbtree *t, node_t *new) {
           {
             new_sibl -> right -> color = new_sibl -> color;
             new_sibl -> color = new_parent -> color;
-            left_rotate(t, new_sibl);
+            left_rotate(t, new_parent);
           }
         }
         new_parent -> color = RBTREE_BLACK;   /// 읭??
@@ -343,12 +352,13 @@ int rbtree_erase(rbtree *t, node_t *new) {
   if (new_child == NULL) {
     if (new == t -> root) {
       t -> root = NULL;
+      free(new);
       return 0;
     }
     // 자식은 없고, 지울 대상이 root는 아닐 때!
     else {
       // 그런데 부모 자식이 둘 다 까망!
-      if ((new -> color == RBTREE_BLACK) && (new_child -> color == RBTREE_BLACK || new_child == NULL)) {
+      if ((new -> color == RBTREE_BLACK) && (new_child == NULL || new_child -> color == RBTREE_BLACK)) {
         fix_double_black(t, new);
       }
       // 색이 달라!! 부모, 자식 중 하나는 빨강, 근데 자식이 없네? 그럼 삼촌만 빨갛게!!
@@ -373,6 +383,7 @@ int rbtree_erase(rbtree *t, node_t *new) {
       new -> key = new_child -> key;
       new -> left = NULL;
       new -> right = NULL;
+      new_child = NULL;
       free(new_child);
     }
     // new를 삭제하고, child를 위로 올려준다!`
@@ -406,6 +417,28 @@ int rbtree_erase(rbtree *t, node_t *new) {
 }
 
 int rbtree_to_array(const rbtree *t, key_t *arr, const size_t n) {
-  // TODO: implement to_array
+  size_t count = 0;
+  inorder_array(t -> root, arr, &count);
   return 0;
+}
+
+
+int i = 0;
+int inorder_array(node_t *n, key_t *arr, size_t *c_ptr) {
+  if (n) {
+    inorder_array(n -> left, arr, c_ptr);
+    arr[*c_ptr] = n -> key;
+    (*c_ptr)++;
+    inorder_array(n -> right, arr, c_ptr);  
+  }
+  return 0;
+}
+
+void print_inorder(node_t *root) {
+  
+  if (root == NULL)
+    return ;
+  print_inorder(root -> left);
+  printf("%d   %d\n", root -> key, root -> color);
+  print_inorder(root -> right);
 }

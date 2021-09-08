@@ -44,6 +44,12 @@ void *fix_double_black(rbtree *, node_t *);
 
 int rbtree_to_array(const rbtree *, key_t *, const size_t);
 
+int inorder_array(node_t *, key_t *, size_t *);
+
+void delete_node(node_t *);
+
 
 void print_inorder(node_t *);
+
 #endif  // RBTREE_H_
+

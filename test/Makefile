@@ -2,13 +2,13 @@
 
 CFLAGS=-I ../src -Wall -g
 
-test: test-rbtree
-	./test-rbtree
+test: my-test-rbtree
+	./my-test-rbtree
 
-test-rbtree: test-rbtree.o ../src/rbtree.o
+my-test-rbtree: my-test-rbtree.o ../src/rbtree.o
 
 ../src/rbtree.o:
 	$(MAKE) -C ../src rbtree.o
 
 clean:
-	rm -f test-rbtree *.o
+	rm -f my-test-rbtree *.o

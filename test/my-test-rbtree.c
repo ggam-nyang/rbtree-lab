@@ -183,6 +183,8 @@ static void init_color_traverse(void) {
 
 static bool color_traverse(const node_t *p, const color_t parent_color,
                            const int black_depth) {
+      // if (p)
+      //   printf("HERE \n %d  %d \n %d \n % d \n", black_depth, max_black_depth, p -> key, p -> color);
   if (p == NULL) {
     if (!touch_nil) {
       touch_nil = true;
@@ -206,6 +208,7 @@ void test_color_constraint(const rbtree *t) {
   assert(p == NULL || p->color == RBTREE_BLACK);
 
   init_color_traverse();
+  // print_inorder(t->root);
   assert(color_traverse(p, RBTREE_BLACK, 0));
 }
 
@@ -216,10 +219,13 @@ void test_rb_constraints(const key_t arr[], const size_t n) {
 
   insert_arr(t, arr, n);
   assert(t->root != NULL);
-
+  node_t *temp1 = rbtree_find(t, 23);
+  node_t *temp2 = rbtree_find(t, 34);
+  rbtree_erase(t, temp2);
+  rbtree_erase(t, temp1);
+  
   test_color_constraint(t);
   test_search_constraint(t);
-
   delete_rbtree(t);
 }
 
@@ -242,6 +248,13 @@ void test_minmax_suite() {
   const size_t n = sizeof(entries) / sizeof(entries[0]);
   test_minmax(entries, n);
 }
+
+// void test_erase_arr() {
+//   const key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
+//   const size_t n = sizeof(entries) / sizeof(entries[0]);
+  
+// }
+
 
 int main(void) {
   test_init();
