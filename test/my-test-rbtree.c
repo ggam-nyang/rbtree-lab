@@ -183,8 +183,7 @@ static void init_color_traverse(void) {
 
 static bool color_traverse(const node_t *p, const color_t parent_color,
                            const int black_depth) {
-      // if (p)
-      //   printf("HERE \n %d  %d \n %d \n % d \n", black_depth, max_black_depth, p -> key, p -> color);
+
   if (p == NULL) {
     if (!touch_nil) {
       touch_nil = true;
@@ -208,7 +207,6 @@ void test_color_constraint(const rbtree *t) {
   assert(p == NULL || p->color == RBTREE_BLACK);
 
   init_color_traverse();
-  // print_inorder(t->root);
   assert(color_traverse(p, RBTREE_BLACK, 0));
 }
 
@@ -219,8 +217,8 @@ void test_rb_constraints(const key_t arr[], const size_t n) {
 
   insert_arr(t, arr, n);
   assert(t->root != NULL);
-  node_t *temp1 = rbtree_find(t, 23);
-  node_t *temp2 = rbtree_find(t, 34);
+  node_t *temp1 = rbtree_find(t, 2);
+  node_t *temp2 = rbtree_find(t, 4);
   rbtree_erase(t, temp2);
   rbtree_erase(t, temp1);
   
@@ -249,11 +247,12 @@ void test_minmax_suite() {
   test_minmax(entries, n);
 }
 
-// void test_erase_arr() {
-//   const key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
-//   const size_t n = sizeof(entries) / sizeof(entries[0]);
-  
-// }
+void test_king_rbtree() {
+  key_t entries[] = {4, 1, 2, 3, 4, 0, 1, 3, 6, 5, 3, 2, 4, 1, 5, 0, 1, 2, 4, 6, 8, 3, 5, 1, 6, 8, 7, 2, 4};
+  const size_t n = sizeof(entries) / sizeof(entries[0]);
+  test_rb_constraints(entries, n);
+  printf("KING");
+}
 
 
 int main(void) {
@@ -262,10 +261,11 @@ int main(void) {
   test_find_single(512, 1024);
   test_erase_root(128);
   test_minmax_suite();
-  test_distinct_values();
-  test_duplicate_values();
-  const key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
-  const size_t n = sizeof(entries) / sizeof(entries[0]);
-  test_to_array(entries, n);
+  // test_distinct_values();
+  // test_duplicate_values();
+  // const key_t entries[] = {10, 5, 8, 34, 67, 23, 156, 24, 2, 12};
+  // const size_t n = sizeof(entries) / sizeof(entries[0]);
+  // test_to_array(entries, n);
+  test_king_rbtree();
   printf("Passed all tests!\n");
 }

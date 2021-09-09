@@ -2,6 +2,18 @@
 #include <malloc.h>
 #include <unistd.h>
 
+node_t *find_min(node_t *);
+node_t *find_child(node_t *);
+node_t *find_sibling(node_t *);
+void *fix_double_black(rbtree *, node_t *);
+node_t *node_insert(node_t *, node_t *,const key_t);
+void insert_color(rbtree *, node_t *);
+void left_rotate(rbtree *, node_t *);
+void right_rotate(rbtree *, node_t *);
+int inorder_array(node_t *, key_t *, size_t *);
+void delete_node(node_t *);
+void print_inorder(node_t *);
+
 
 rbtree *new_rbtree(void) {
   rbtree *p = (rbtree *)calloc(sizeof(rbtree), 1);
@@ -41,7 +53,6 @@ node_t *rbtree_insert(rbtree *t, const key_t key) {
     t -> root -> left = NULL;
     t -> root -> right = NULL;
   }
-
   else
   {
     node_t *new = (node_t*)calloc(sizeof(node_t), 1);
